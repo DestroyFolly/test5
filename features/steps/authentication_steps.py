@@ -7,7 +7,7 @@ BASE_URL = "http://127.0.0.1:5000"
 
 @given('the user provides valid email and password')
 def step_register_user(context):
-   context.email = "and.averyanov03@gmail.com"
+   context.email = "paulpa2003@gmail.com"
    context.password = "password"
 
 
@@ -38,7 +38,7 @@ def step_verify_email(context):
 
 @given('the user has registered and verified email')
 def step_login_user(context):
-    context.email = "and.averyanov03@gmail.com"
+    context.email = "paulpa2003@gmail.com"
     context.password = "password"
     context.wrong_password = "wrong_password"
     context.verification_code = "1234"
@@ -74,7 +74,7 @@ def step_login_success(context):
 
 @given('the user has registered verified email and old password')
 def step_provide_email_and_password(context):
-    context.email = "and.averyanov03@gmail.com"
+    context.email = "paulpa2003@gmail.com"
     context.old_password = "password"
 
 
@@ -100,7 +100,7 @@ def step_receive_verification_code(context):
 
 @given('the user has registered verified email, new_password and verification code')
 def step_provide_email_and_password(context):
-    context.email = "and.averyanov03@gmail.com"
+    context.email = "paulpa2003@gmail.com"
     context.new_password = "new_password"
     context.verification_code = "1234"
 
@@ -122,7 +122,7 @@ def step_password_changed(context):
 
 @given('the user provides email and password')
 def step_provide_email_and_password(context):
-    context.email = "and.averyanov03@gmail.com"
+    context.email = "paulpa2003@gmail.com"
     context.password = "new_password"
     context.wrong_password = "wrong_password"
 
