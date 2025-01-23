@@ -94,6 +94,7 @@ def step_receive_verification_code(context):
 
 @then('the user confirms the verification code')
 def step_receive_verification_code(context):
+    print(context.response.status_code)
     assert context.verification_code == "1234"
     assert context.response.status_code == 400
 
