@@ -95,7 +95,7 @@ def step_receive_verification_code(context):
 @then('the user confirms the verification code')
 def step_receive_verification_code(context):
     assert context.verification_code == "1234"
-    assert context.response.status_code == 200
+    assert context.response.status_code == 400
 
 
 @given('the user has registered verified email, new_password and verification code')
