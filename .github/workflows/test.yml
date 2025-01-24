@@ -1,4 +1,4 @@
-name: E2E tests
+name: E2E tests 
 
 on: [push]
 
@@ -8,7 +8,6 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4
-
       - name: Stop and remove existing containers
         run: |
           docker stop $(docker ps -aq) || true
@@ -31,9 +30,6 @@ jobs:
           docker-compose build
           docker-compose up -d
 
-      - name: List running containers
-        run: docker ps
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -44,30 +40,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install behave requests
+          
 
-      - name: Wait for Prometheus metrics endpoint
+      - name: Wait for service to be ready
         run: |
-          timeout 90s bash -c 'until curl -v -s http://localhost:8000/metrics > /dev/null; do sleep 5; done'
+          timeout 60s bash -c 'until curl -v -s http://localhost:5000/docs > /dev/null; do sleep 5; done'
 
       - name: Run tests
         run: |
           cd features/steps
           behave
-
-      - name: Save Prometheus metrics
-        run: |
-          curl -s http://localhost:8000/metrics > prometheus_metrics.txt || echo "Metrics not available" > prometheus_metrics.txt
-        continue-on-error: true
-
-      - name: Display Prometheus metrics in logs
-        run: |
-          cat prometheus_metrics.txt
-
-      - name: Upload Prometheus metrics as artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: prometheus-metrics
-          path: prometheus_metrics.txt
 
       - name: Stop containers
         run: |
