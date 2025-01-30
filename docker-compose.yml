@@ -1,3 +1,4 @@
+version: '3.3'
 services:
   auth-app:
     container_name: auth-app
@@ -8,3 +9,26 @@ services:
       - "5000:5000"
     env_file:
       - .env
+  jaeger:
+    image: jaegertracing/all-in-one:1.41
+    container_name: jaeger
+    ports:
+      - "5775:5775/udp"
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+      - "5778:5778"
+      - "16686:16686" # Web-интерфейс Jaeger
+      - "14268:14268"
+      - "14250:14250"
+      - "9411:9411"
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=72h'
+      - '--storage.tsdb.wal-compression'
