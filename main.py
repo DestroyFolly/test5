@@ -22,6 +22,7 @@ from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.metrics import CallbackOptions, Observation, get_meter
 from opentelemetry.exporter.prometheus import PrometheusMetricReader
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
+from opentelemetry.sdk.resources import Resource
 from typing import Iterable
 import psutil
 import json
@@ -39,7 +40,11 @@ metrics.set_meter_provider(provider)
 meter = metrics.get_meter(__name__)
 
 def setup_otel():
-    trace.set_tracer_provider(TracerProvider())
+    trace.set_tracer_provider(
+       TracerProvider(
+           resource=Resource.create({"service.name": "my-service"})
+       )
+    )
     tracer_provider = trace.get_tracer_provider()
     
     tracer_provider.add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
@@ -84,15 +89,6 @@ print("Метрики доступны по адресу http://localhost:8000/m
 
 
 
-def setup_otel():
-    trace.set_tracer_provider(TracerProvider())
-    tracer_provider = trace.get_tracer_provider()
-    
-    tracer_provider.add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
-
-    FastAPIInstrumentor().instrument_app(app)
-    LoggingInstrumentor().instrument(set_logging_format=True)
-
 
 def send_verification_email(email: str, code: str):
     sender_email = os.environ["sender_email"]
@@ -111,13 +107,17 @@ def send_verification_email(email: str, code: str):
 
 @app.post("/login")
 def login(user: UserLogin):
-    logger = logging.getLogger(__name__)
-    logger.info("login")
-    db_user = users_db.get(user.email)
-    if not db_user or db_user["password"] != user.password or not db_user["is_verified"]:
-        raise HTTPException(status_code=400, detail="Неверные учетные данные или email не подтвержден")
+    tracer = trace.get_tracer(__name__)
+    with tracer.start_as_current_span("login-operation", kind=SpanKind.SERVER) as span:
+        logger = logging.getLogger(name)
+        logger.info("login")
+        db_user = users_db.get(user.email)
+        if not db_user or db_user["password"] != user.password or not db_user["is_verified"]:
+            span.set_attribute("error", True)
+            raise HTTPException(status_code=400, detail="Неверные учетные данные или email не подтвержден")
+        span.set_attribute("user.email", user.email)
+        return HTTPException(status_code=200, detail="Вход выполнен успешно!")
 
-    return HTTPException(status_code=200, detail="Вход выполнен успешно!")
 
 
 @app.post("/delete")
